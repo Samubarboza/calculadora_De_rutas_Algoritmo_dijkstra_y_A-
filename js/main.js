@@ -13,36 +13,51 @@ boton.addEventListener('click', () => {
     const filas = parseInt(document.getElementById('input-filas').value);
     const columnas = parseInt(document.getElementById('input-columnas').value);
 
-    // aca chequeamos que esos valores sean numeros validos y mayores  o iguales a 2
+     // aca chequeamos que esos valores sean numeros validos y mayores  o iguales a 2
     // si no, mostramos alerta y salimos de la funcion para que no siga el proceso
     if (isNaN(filas) || isNaN(columnas) || filas < 2 || columnas < 2) {
         alert('Por favor ingresa valores validos, minimo de 2x2');
         return; // aca corta la ejecucion
     }
 
-    // aca lo que hacemos es creamos el mapa con los valores que ingreso el usuario de filas y columnas
+      // aca lo que hacemos es creamos el mapa con los valores que ingreso el usuario de filas y columnas
     // y le pedimos que genere obstalos de manera aleatoria
     const mapa = new Mapa(filas, columnas, 'aleatorio');
+
+    // aca leemos las coordenadas que ingresan los usuarios
+    const input_inicio = document.getElementById('input-inicio').value;
+    const input_fin = document.getElementById('input-fin').value;
+
+    // convertimos los textos a arrays de numeros
+    const inicio = input_inicio.split(',').map(Number);
+    const fin = input_fin.split(',').map(Number);
+
+    // validamos que tengan el formato correcto y que esten dentro del mapa
+    function coordenada_valida(coord) {
+        const [f, c] = coord;
+        return (
+            !isNaN(f) && !isNaN(c) && 
+            f >= 0 && f < filas &&
+            c >= 0 && c < columnas &&
+            mapa.obtener_matriz()[f][c] === 0 // solo permitimos empezar/terminar si es un terrno libre
+        )
+    }
+
+    // si no son validas, cortamos
+    if (!coordenada_valida(inicio) || !coordenada_valida(fin)) {
+        alert('Coordenadas invaldias, Verifica que esten dentro del mapa y no caigan sobre un obstaculo.');
+        return;
+    }
+
+    // si son iguales no sirve
+    if (inicio[0] === fin[0] && inicio[1] === fin[1]) {
+        alert('El punto de inicio y de fin no pueden ser iguales');
+        return
+    }
 
     // aca creamos una instancia del algoritmo Dijkstra pasandole la matriz del mapa
     // la matriz es un array 2d que representa el terreno y obstaculos
     const dijkstra = new Dijkstra(mapa.obtener_matriz());
-
-    // funcion que genera una coordenada aleatoria dentro del rango del mapa
-    function coordenada_aleatoria() {
-        return [
-            Math.floor(Math.random() * filas), // fila aleatoria entre 0 y filas -1
-            Math.floor(Math.random() * columnas)
-        ];
-    }
-    // aca generamos el punto de inicio y de fin pero aleatoriamente
-    let inicio = coordenada_aleatoria();
-    let fin = coordenada_aleatoria();
-
-    // nos aseguramos que el inicio y fin no sean la misma celda
-    while (inicio[0] === fin[0] && inicio[1] === fin[1]) {
-        fin = coordenada_aleatoria();
-    }
 
     // aca lo que hacemos es, ejecutamos el algoritmo para calcular la ruta des el inicio hasta el fin 
     // devuelve un array con las coordenadas del camino mas corto, o null si no hay otra ruta
