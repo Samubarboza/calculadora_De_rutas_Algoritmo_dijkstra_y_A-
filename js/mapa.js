@@ -1,107 +1,67 @@
-// objeto con constantes del terreno
+// CREAMOS LOS OBJETOS CON LOS TIPOS DE TERRENOS PARA EL MAPA
+// USAMOS NUMEROS PARA QUE EL ALMACENAMIENTO EN MEMORIA SEA MAS SENCILLO Y PARA LAS COMPARACIONES 
 const TERRENOS = {
-    LIBRE: 0, // este es un espacio libre en el terreno donde se puede pasar
-    EDIFICIO: 1, // este es un obstaculo de tipo edificio, donde se puede pasar
-    AGUA: 2, // los mismo de arriba pero un obstaculo de tipo agua 
-    BLOQUEADO: 3 // y este obstaculo bloquea todo
-}; 
+    LIBRE: 0,
+    EDIFICIO: 1,
+    AGUA: 2,
+    BLOQUEADO: 3
+};
 
-// clase mapa que va a guardar los valores que reciba para construir todo el mapa
+// ACA CREAMOS LA CLASE MAPA QUE SE ENCARGAR DE GENERAR EL MAPA Y MANEJAR LA LOGICA DE OBSTACULOS Y VALIDACION
 class Mapa {
-    constructor(filas, columnas, obstaculos = 'limpio') {
-        // atributos que van a guardar los valores para generar el mapa
-        this.filas = filas;  
+    constructor(filas, columnas) {
+        // aca vamos a guardar los valores que va a recibir para poder construir
+        this.filas = filas;
         this.columnas = columnas;
-        this.matriz = []; // aca se va a guardar el mapa 2d
+        this.matriz = []; // aca se guarda el mapa
 
-        this.generarMapa(obstaculos); // se genera el mapa segun el modo que se indique
+        // CUANDO CREAMOS LA INSTANCIA YA VA A GENERAR EL MAPA CON LOS OBSTACULOS ALEATORIOS
+        this.generar_mapa();
     }
+    // ESTE ES MI METODO QUE VA A CREAR UNA MATRIZ Y COLOCAR LOS OBSTACULOS
+    // VAMOS A CONSIDERAR 20% DEL TOTAL DE LAS CELDAS PARA COLOCAR LOS OBSTACULOS
+    generar_mapa() {
+        this.matriz = []; // inicializamos limpio la matriz
 
-    generarMapa(modo) {
-        // inicializamos matriz vacia
-        this.matriz = [];
-
-        // llenamos fila por fila
+        // recorremos filas 
         for (let fila = 0; fila < this.filas; fila++) {
-            const filaArray = []; // empezar la matriz limpia
+            const fila_array = []; // guardamos, creamos una nueva fila
 
-            // llenamos cada celda con el terreno libre, o sea donde se puede transitar
-            for (let columna = 0; columna < this.columnas; columna++) {
-                filaArray.push(TERRENOS.LIBRE); // mapa limpio de entrada
+            for(let columna = 0; columna < this.columnas; columna++) {
+                fila_array.push(TERRENOS.LIBRE); // en el array metemos todo el objeto terreno libre
             }
-            this.matriz.push(filaArray) // aca agregamos la fila a la matriz
+            this.matriz.push(fila_array); // y aca agregamos la fila a la matriz
         }
-        
-        // agregamos obstaculos segun el modo, en este caso estamos agregando los obstaculos manualmente
-        if (modo === 'predeterminado') {
-            // obstaculos fijos en posiciones especificas
-            this.agregar_obstaculo(1, 1, TERRENOS.EDIFICIO);
-            this.agregar_obstaculo(2, 3, TERRENOS.AGUA);
-            this.agregar_obstaculo(0, 4, TERRENOS.BLOQUEADO);
-        } else if (modo === 'aleatorio') { // si se juega en modo aleatorio se agregan los obstalos al azar
-            const total = Math.floor(this.filas * this.columnas * 0.2); // se calcula la cantidad de obstaculos - 20% del mapa
-            let contador = 0;
+        // ACA VAMOS A DEFINNIR CUANTOS OBSTACULOS VAMOS A COLOCAR Y OBVIAMENTE ALEATORIO VA A SER
+        const total_obstaculos = Math.floor(this.filas * this.columnas * 0.2);
+        let colocados = 0; // este es mi contador que va a tomar la cuenta de cuantos ya se puso
 
-            // mientras no se hayan puesto todos los obstaculos, seguimos agregando 
-            while (contador < total) {
-                // elejimos una fila y columna al azar dentro del mapa
-                const f = Math.floor(Math.random() * this.filas);
-                const c = Math.floor(Math.random() * this.columnas);
+        // aca vamos a colocar los obstaculos hasta llegar al 20% del total del terreno
+        while(colocados < total_obstaculos) {
+            const f = Math.floor(Math.random() * this.filas); // redondeamos hacia abajo el numero decimal, y creamosun numero aleatorio
+            const c = Math.floor(Math.random() * this.columnas);
 
-                // solo agregamos los obstaculos si la celda es igual a libre
-                if (this.matriz[f][c] === TERRENOS.LIBRE) {
-                    // definimos los tipos de obstaculos
-                    const tipos = [TERRENOS.EDIFICIO, TERRENOS.AGUA, TERRENOS.BLOQUEADO];
-                    // elegimos un tipo de obstaculo al azar
-                    const tipo = tipos[Math.floor(Math.random() * tipos.length)];
+            // SOLO VAMOS A PONER OBSTACULOS SI LA CELDA ESTA LIBRE 
+            if (this.matriz[f][c] === TERRENOS.LIBRE) {
+                const tipos = [TERRENOS.EDIFICIO, TERRENOS.AGUA, TERRENOS.BLOQUEADO]; // TIPOS DE OBSTACULOS
+                const tipo = tipos[Math.floor(Math.random() * tipos.length)]; // aca elije uno al azar nomas
 
-                    this.matriz[f][c] = tipo; // asignamos el obstaculo a la celda
-                    contador++; // y le decimos al contador que agregamos uno
-                }
+                this.matriz[f][c] = tipo; // aca colocamos el obstaculo en la matriz
+                colocados++;
             }
         }
     }
-
-    // metodo para agregar un obstaculo manualmente 
-    agregar_obstaculo(fila, columna, tipo) {
-        if (this.es_coordenada_valida(fila, columna)) {
-            this.matriz[fila][columna] = tipo; // si la coordenada es valida agregamos el obstaculo
-        } else {
-            // si no es valida, mostramos este mensaje
-            console.warn(`Coordenada invalida: (${fila}, ${columna})`);
-        }
-    }
-
-    // metodo para validar si una coordenada esta dentro del mapa
+    // ESTE ES MI METODO PARA VALIDAR LA COORDENADA - verifica si la coordenada este dentro de los limits
     es_coordenada_valida(fila, columna) {
         return (
             fila >= 0 && fila < this.filas &&
             columna >= 0 && columna < this.columnas
         );
     }
-
-    // mostrar mapa en consola
-    mostrar_en_consola() {
-        console.log('MAPA');
-        for (let fila of this.matriz) {
-            // convierte los valores numericos a simbolos y los une en string
-            console.log(fila.map(valor => this.simbolo_terreno(valor)).join(' '));
-        }
-    }
-
-    // devolvemos simbolos para que sea mas legible en consola
-    simbolo_terreno(valor) {
-        switch (valor) {
-            case TERRENOS.LIBRE: return '🔲'; // este es el simbolo para terreno libre
-            case TERRENOS.EDIFICIO: return '🏢';
-            case TERRENOS.AGUA: return '🌊';
-            case TERRENOS.BLOQUEADO: return '⛔';
-            default: return '?';
-        }
-    }
-    // getter de la matriz si queres usarla afuera de la clase
+    // ESTE METODO DEVUELVE LA MATRIZ COMPLETA PARA PODER USAR
     obtener_matriz() {
         return this.matriz;
     }
-} export { Mapa, TERRENOS };
-
+}
+// EXPORTAMOS PARA PODER USAR EN EL MAIN
+export { Mapa, TERRENOS };
