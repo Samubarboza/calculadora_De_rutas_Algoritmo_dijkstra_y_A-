@@ -1,69 +1,70 @@
-// vamos a crear la clase COLA DE PRIORIDAD
-// ESTA CLASE SIVER PARA QUE YO PUEDA MANEJAR UNA LISTA ORDENADA DE ELEMENTOS SEGUN SU PRIORIDAD - DE MENOR A MAYOR
-// USAMOS ESTA CLASE PARA OPTIMIZAR EL ALGORTIMO DIJKSTRA/A* BUSCANDO SIEMPRE LA CELDA CON MENOR COSTO
+// esta clase sirve para mantener una lista ordenada de elementos segun prioridad (de menor a mayor)
+// vamos a usar esto para optimizar el algortimo y va a permitir procesar siempre la celda con menor costo
 class ColaPrioridad {
-    constructor() {
-        this.elementos = []; // ARRAY QUE GUARDA LOS ELEMENTOS JUNTO CON SU PRIORIDAD
+    constructor() { // el constructor usamos para inicializar el objeto cuando se crea
+        this.elementos = []; // aca vamos a guardar una lista de elementos cada vez que encolamos
     }
-    //agregamos un elemento con su prioridad
+    // aca cremos un metodo que es para agregar un elemento cn su prioridad
     encolar(elemento, prioridad) {
-        this.elementos.push({elemento, prioridad}); // guardamos un objeto con la celda y su prioridad
-
-        // usamos sort para ordenar el array segun la prioridad
-        // a y b son elementos del array y comparamos su prioridades
-        // si a.prioridad < b.prioridad . se mantiene el orden. si es al reves se reordenan
-        this.elementos.sort((a, b) => a.prioridad - b.prioridad);
+        this.elementos.push({elemento, prioridad}); // aca agregamos al array
+        this.elementos.sort((a, b) => a.prioridad - b.prioridad); // ordenamos el array elementos poniendo primero el que tenga menor prioridad
     }
-    // elimina y devuelve el elemento con menor prioridad
+    // este metodo es para desencolar - o sea para sacar elementos con menor prioridad
     desencolar() {
-        // shift saca el primer elemento del array (el de menor prioridad por el sort )
-        // usamos ?.elemento por si el array esta vacio (para evitar error)
-        return this.elementos.shift()?.elemento;
+        return this.elementos.shift()?.elemento; // usamos ? por si el array esta vacio , si hay algo agarra, si no, no pasa nada
     }
-    // devuelve true si la cola esta vacia
+    // este metodo creamos para desencolar - esto devuelve true si es que la cola esta vacia o false si hay elementos
     esta_vacia() {
         return this.elementos.length === 0;
     }
 }
 
-// aca creamos mi clase dijkstra con a*
+// aca vamos a crear mi clase dijkstra
+// vamos a tener el algoritmo dijkstra y a* que se activan 
 class Dijkstra {
-    constructor(matriz_mapa) {
-        this.matriz = matriz_mapa; // aca guardamos la matriz del mapa
-        this.filas = matriz_mapa.length; 
-        this.columnas = matriz_mapa[0].length;
-        this.distancias = []; // se van a guardar las distancias minimas desde el inicio
-        this.visitados = []; // se van a guardar la matriz de celdas ya visitadas
-        this.predecesores = []; // se van a guardar la celda de donde venimos para cada celda
-        this.usar_heuristica = false; // desde el inicio es false, pero si la distancia es mayor a 10 usamos A*
+    constructor(matriz_mapa) { // recibe el mapa para buscar caminos en la matriz
+        this.matriz = matriz_mapa; // guardamos la matriz del mapa
+        this.filas = matriz_mapa.length; // length cuenta la cantidad de elementos, nos dice cuantas filas tiene el array
+        this.columnas = matriz_mapa[0].length; //lo mismo pero con las columnas
+        // esto usamos para que el algortimo funcione bien y va a guardar las infos
+        this.distancias = []; 
+        this.visitados = [];
+        this.predecesores = [];
+        this.usar_heuristica = false; // el A* se activa solo si es que la distancia es larga - heuristica es encontrar, lo mas rapido
     }
-    // INICIALIZAMOS LAS MATRICES DE TRABAJO
+    // usamos un metodo para inicializar las matrices
     inicializar_estructuras() {
+        // recorremos las filas y agregamos a las propiedades del objeto para usar su informacion
         for (let fila = 0; fila < this.filas; fila++) {
             this.distancias[fila] = [];
             this.visitados[fila] = [];
             this.predecesores[fila] = [];
+            
+            // lo mismo pero con columnas
             for (let columna = 0; columna < this.columnas; columna++) {
-                this.distancias[fila][columna] = Infinity; // infiniti representa una distancia imposible (inicialmente todo esta lejos)
-                this.visitados[fila][columna] = false; // inicialmente todo esta falso, ninguna celda se visito
-                this.predecesores[fila][columna] = null; // aca esta en nulo, aun no sabemos como llegamos
+                // inicialmente todos estan infinitamente lejos, el algoritmo sabe que puede interntar mejorar la distancia
+                this.distancias[fila][columna] = Infinity; 
+                this.visitados[fila][columna] = false; 
+                this.predecesores[fila][columna] = null; // al principio no tenemos predecesores
             }
         }
     }
-    // buscamos celdas vecinas validas (que esten en el mapa y no sean obstaculos)
+
+    // este metodo es para que podamos obtener los vecinos validos
     obtener_vecinos_validos(fila, columna) {
-        const vecinos = [];
+        const vecinos = []; 
         const direcciones = [
             [0, 1],
             [1, 0],
             [0, -1],
             [-1, 0]
         ];
+        // recorremos en los movimientos
         for (const [desplazar_fila, desplazar_columna] of direcciones) {
             const nueva_fila = fila + desplazar_fila;
             const nueva_columna = columna + desplazar_columna;
 
-            // verificamos que este dentro del mapa y no sea un obstaculo (tipo 1, 2, 3)
+            // verificamos que no salga del mapa y que no sea un obstaculo 
             if (
                 nueva_fila >= 0 && nueva_fila < this.filas &&
                 nueva_columna >= 0 && nueva_columna < this.columnas &&
@@ -71,77 +72,81 @@ class Dijkstra {
                 this.matriz[nueva_fila][nueva_columna] !== 2 &&
                 this.matriz[nueva_fila][nueva_columna] !== 3
             ) {
-                vecinos.push([nueva_fila, nueva_columna]);
+                vecinos.push([nueva_fila, nueva_columna]); // agregamos los vecinos validos
             }
         }
         return vecinos;
     }
-    // calcular la distancia de manhatan (heuristica)
+
+    // aca usamos la distancia de manhatan y le llamo heuristica porque es como encontrar el camino mas rapido
     calcular_heuristica(fila_actual, columna_actual, fila_destino, columna_destino) {
-        // Math.abs devuelve el valor absoluto 
         return Math.abs(fila_actual - fila_destino) + Math.abs(columna_actual - columna_destino);
     }
-    // esta es la funcion principal que encuentra el camino mas corto
+    // este es mi meotod principal para calcular el camino mas corto
     calcular_camino(fila_inicio, columna_inicio, fila_destino, columna_destino) {
-        this.inicializar_estructuras(); // limpiamos todo
+        this.inicializar_estructuras(); // usamos la funcion para iniciar laestructura
 
-        // decidimos si usamos A* SI ES QUE LA ESTRUCTURA ES GRANDE
+        // aca decidimos que vamos a usar A* si el camino esta lejos - usamos la distancia de manhatan para calcular la distancia
         const distancia_estimada = this.calcular_heuristica(fila_inicio, columna_inicio, fila_destino, columna_destino);
-        this.usar_heuristica = distancia_estimada > 10;
+        this.usar_heuristica = distancia_estimada > 10; // si la distancia es 
 
-        // creamos una cola de prioridad para procesar las celdas por prioridad
+        // aca creamos la cola de prioridad y comenzamos desde el inicio
         const cola_prioridad = new ColaPrioridad();
-        this.distancias[fila_inicio][columna_inicio] = 0; // la distancia al inicio es 0
-        cola_prioridad.encolar([fila_inicio, columna_inicio], 0);
+        this.distancias[fila_inicio][columna_inicio] = 0; // el incio tiene distancia 0 porque ahi estamos
+        cola_prioridad.encolar([fila_inicio, columna_inicio], 0); // metemos la posicion inicial con priori 0 para empezar ahi
 
-        // bucle principal 
+        // bucle pricipal
         while (!cola_prioridad.esta_vacia()) {
             const [fila_actual, columna_actual] = cola_prioridad.desencolar();
-            if (this.visitados[fila_actual][columna_actual]) continue; // si ya visitamos, saltamos
 
-            this.visitados[fila_actual][columna_actual] = true;
+            // si visitamos la celda, seguimos, o sea saltamos
+            if (this.visitados[fila_actual][columna_actual]) continue;
+            this.visitados[fila_actual][columna_actual] = true; // si no, marcamos ahora que ya visitamos para no volver a procesar
 
-            if (fila_actual === fila_destino &&
-                columna_actual === columna_destino
-            ) break; // llegamos al destino, parar
+            // si llegamos al destino salimos del bucle
+            if (fila_actual === fila_destino && columna_actual === columna_destino) break;
 
-            // recorremos vecinos validos
+            // recorremos todos los vecinos validos de la celda actual para ver de llegar de forma mas corta
             for (const [fila_vecina, columna_vecina] of this.obtener_vecinos_validos(fila_actual, columna_actual)) {
-                const nueva_distancia = this.distancias[fila_actual][columna_actual] +1; // cada paso cuesta 1
+                // calculo cuanto cuesta llegar hasta el vecino valido desde donde estoy ahora
+                const nueva_distancia = this.distancias[fila_actual][columna_actual] + 1; //suma 1, cuesta 1 moverse aun vecino
 
-                if(nueva_distancia < this.distancias[fila_vecina][columna_vecina]) {
-                    // si encontramos un vamino mas corto, actualizamos la informacion
-                    this.distancias[fila_vecina][columna_vecina] = nueva_distancia;
-                    this.predecesores[fila_vecina][columna_vecina] = [fila_actual, columna_actual];
+                // si encontramos un camino mas corto a la vecina, actualizamos.
+                if (nueva_distancia < this.distancias[fila_vecina][columna_vecina]) { 
+                    this.distancias[fila_vecina][columna_vecina] = nueva_distancia; // asignamos la nueva distancia si es mas corto
+                    // guardamos de donde venimos para saber como llego hasta ahi y reconstruir despues el camino
+                    this.predecesores[fila_vecina][columna_vecina] = [fila_actual, columna_actual]; 
 
-                    // calculamos la prioridad para la cola (dijkstra solo g, a* g + h)
-                    let prioridad = nueva_distancia;
-                    if (this.usar_heuristica) {
-                        const heuristica = this.calcular_heuristica(fila_vecina, columna_vecina, fila_destino, columna_destino);
-                        prioridad += heuristica;
+                    // aca vamos a calcular la prioridad
+                    let prioridad = nueva_distancia; // le pasamos los pasos que ya dimos
+                    if (this.usar_heuristica) { // si estamos usando heuristica o sea A*
+                        // el camino que falta desde el punto en el que estamos
+                        const heuristica = this.calcular_heuristica(fila_vecina, columna_vecina, fila_destino, columna_destino); 
+                        prioridad += heuristica; // prioridad es el pnto en el que estamos + el camino que falta
                     }
                     cola_prioridad.encolar([fila_vecina, columna_vecina], prioridad);
                 }
             }
         }
-        // reconstruimos el camino desde el destino hasta el incio
+        // reconstruimos el camino
         const camino = [];
         let f = fila_destino;
         let c = columna_destino;
 
-        while (f !== null && c !== null) {
-            camino.unshift([f, c]); // agregamos al incio del array
-            const anterior = this.predecesores[f][c];
-            if (!anterior) break; 
-            f = anterior[0];
+        // vamos hacia atras desde el destino hasta el inicio usando predecesores
+        while(f !== null && c !== null) { // mientras haya una celda valida
+            camino.unshift([f,c]); // agregamos al principio del array
+            const anterior = this.predecesores[f][c]; // miramos de donde vino
+            if (!anterior) break; // si no hay celda anterior llegamos al inicio y paramos
+            f = anterior[0]; // esto es como la marca de donde vinimos
             c = anterior[1];
         }
-        // verificamos si se llego correctamente 
-        if (camino.length === 0 || camino[0][0] !== fila_inicio || camino[0][1] !== columna_inicio) {
-            return null; // no hay camino
+
+        // si no encontramos ningun camino o no empieza de donde deberia
+        if (camino.length === 0 || camino[0][0] !== fila_inicio || camino[0][1] !== columna_inicio) { 
+            return null; // aca le decimos que no se encontro camino
         }
-        return camino; // devolvemos el camino completo
+        return camino;
     }
 }
-// exportamos la clase para usarla desde otros archivos
 export { Dijkstra };
