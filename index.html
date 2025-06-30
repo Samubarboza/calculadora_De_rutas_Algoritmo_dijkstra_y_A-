@@ -3,17 +3,71 @@
 <head>
 <meta charset="UTF-8">
 <title>Escape en Coordenadas</title>
+<style>
+body {
+    font-family: sans-serif;
+    background: #f0f0f0;
+    padding: 20px;
+    text-align: center;
+}
+
+h1 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin: 10px 0;
+}
+
+input {
+    padding: 5px;
+    font-size: 1rem;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+}
+
+button {
+    margin-top: 15px;
+    padding: 10px 20px;
+    font-size: 1.2rem;
+    background-color: #4a90e2;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+}
+
+#contenedor-mapa {
+    margin-top: 30px;
+    display: grid;
+    justify-content: center;
+    gap: 2px;
+}
+
+.celda {
+    width: 40px;
+    height: 40px;
+    background-size: cover;
+    background-position: center;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+</style>
 </head>
 <body>
-<h1>🧭 Escape en Coordenadas: La Última Ruta 🗺️🚧</h1>
 
-    <label>Filas: <input type="number" id="input-filas" value="10" min="2" style="font-size: 0.9rem;"></label><br><br>
-    <label>Columnas: <input type="number" id="input-columnas" value="10" min="2" style="font-size: 0.9rem;"></label><br><br>
-    <label>Punto de inicio: <input type="text" id="input-inicio" placeholder="Ej: 0,0"></label><br><br>
-    <label>Punto de destino: <input type="text" id="input-fin" placeholder="Ej: 3,4"></label><br><br>
-    <button id="btn-generar" style="background-color: gray; color: white; font-size: 1.6rem; border-radius: 15px;">Generar mapa y calcular ruta</button>
+<h1>🧭 Escape en Coordenadas: La Última Ruta 🗺️</h1>
 
-    <div id="contenedor-mapa" style="margin-top: 20px;"></div>
+    <label>Filas: <input type="number" id="input-filas" value="10" min="2"></label>
+    <label>Columnas: <input type="number" id="input-columnas" value="10" min="2"></label>
+    <label>Punto de inicio: <input type="text" id="input-inicio" placeholder="Ej: 0,0"></label>
+    <label>Punto de destino: <input type="text" id="input-fin" placeholder="Ej: 3,4"></label>
+
+    <button id="btn-generar">Generar mapa y calcular ruta</button>
+
+    <div id="contenedor-mapa"></div>
 
 <script type="module" src="./js/main.js"></script>
 </body>
