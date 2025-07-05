@@ -6,18 +6,19 @@ const TERRENOS = {
 };
 
 class Mapa {
+    #matriz;
     constructor(filas, columnas) {
         this.filas = filas;
         this.columnas = columnas;
-        this.matriz = [];
+        this.#matriz = [];
     }
 
     // crear matriz limpia con terrenos libres
     inicializar_matriz() {
-        this.matriz = [];
+        this.#matriz = [];
         for (let fila = 0; fila < this.filas; fila++) {
             const fila_array = new Array(this.columnas).fill(TERRENOS.LIBRE);
-            this.matriz.push(fila_array);
+            this.#matriz.push(fila_array);
         }
     }
 
@@ -39,9 +40,9 @@ class Mapa {
             const es_inicio = inicio && f === inicio[0] && c === inicio[1];
             const es_fin = fin && f === fin[0] && c === fin[1];
 
-            if (this.matriz[f][c] === TERRENOS.LIBRE && !es_inicio && !es_fin) {
+            if (this.#matriz[f][c] === TERRENOS.LIBRE && !es_inicio && !es_fin) {
                 const tipo = tipos[Math.floor(Math.random() * tipos.length)];
-                this.matriz[f][c] = tipo;
+                this.#matriz[f][c] = tipo;
                 colocados++;
             }
         }
@@ -62,7 +63,7 @@ class Mapa {
     }
 
     obtener_matriz() {
-        return this.matriz;
+        return this.#matriz;
     }
 }
 
