@@ -14,6 +14,7 @@ class Visualizador {
         const celdasRuta = new Set(ruta.map(([f, c]) => `${f},${c}`));
         const tabla = this.crearTabla();
 
+        // recorremos cada elemento del array
         matriz.forEach((fila, filaIndex) => {
             const filaHtml = this.crearFila();
             fila.forEach((tipo, colIndex) => {

@@ -1,6 +1,6 @@
 // clase que solo se encarga de reconstruir el camino desde la matriz de predecesores, con camino mas corto
 class Ruta {
-    // metodo que reconstruye el camino desde el destino hacia el inicio
+    // metodo que reconstruye el camino desde el destino hacia el inicio, esto pertenece solo a la clase
     static reconstruir(predecesores, fila_destino, columna_destino, fila_inicio, columna_inicio) {
         // aca guardamos el camino
         const camino = []; 
